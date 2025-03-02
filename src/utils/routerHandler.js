@@ -1,12 +1,12 @@
 import { globalErrorHandler } from "../Middlewares/errorHandlerMiddleware.js";
-import authRouter from "../Modules/user/authController.js";
-import profileRouter from "../Modules/user/profileController.js";
+import userRouter from "../Modules/User/userController.js";
+import authRouter from "../Modules/Auth/authController.js";
 
 export default function routerHandler(app, express) {
   app.use("/Assets", express.static("Assets"));
 
   app.use("/auth", authRouter);
-  app.use("/user", profileRouter);
+  app.use("/user", userRouter);
 
   app.get("/", (req, res) => {
     res.status(200).json({ message: "Welcome in Social app" });
