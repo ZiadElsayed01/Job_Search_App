@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import { gender, provider, role } from "../../Constants/constants.js";
+import { gender, provider, role, type } from "../../Constants/constants.js";
+import { Encryption } from "../../utils/encryptionAndDecryption.js";
+import { hash, hashSync } from "bcrypt";
 
 const userSchema = new mongoose.Schema(
   {
@@ -8,7 +9,11 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
-    provider: { type: String, enum: Object.values(provider), required: true },
+    provider: {
+      type: String,
+      enum: Object.values(provider),
+      default: provider.CREDENTIALS,
+    },
     gender: { type: String, enum: Object.values(gender), required: true },
     DOB: {
       type: Date,
@@ -22,10 +27,10 @@ const userSchema = new mongoose.Schema(
       },
     },
     mobileNumber: { type: String, required: true },
-    role: { type: String, enum: Object.values(role), default: "User" },
+    role: { type: String, enum: Object.values(role), default: role.USER },
     isConfirmed: { type: Boolean, default: false },
-    deletedAt: { type: Date, default: null },
-    bannedAt: { type: Date, default: null },
+    deletedAt: { type: Date },
+    bannedAt: { type: Date },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     changeCredentialTime: { type: Date },
     profilePic: {
@@ -38,13 +43,13 @@ const userSchema = new mongoose.Schema(
     },
     OTP: [
       {
-        code: { type: String, required: true },
+        code: { type: String },
         type: {
           type: String,
-          enum: Object.values(provider),
+          enum: Object.values(type),
           required: true,
         },
-        expiresIn: { type: Date, required: true },
+        expiresIn: { type: Date },
       },
     ],
   },
@@ -53,18 +58,22 @@ const userSchema = new mongoose.Schema(
 
 // Virtual field for username
 userSchema.virtual("username").get(function () {
-  return `${this.firstName}${this.lastName}`;
+  return `${this.firstName} ${this.lastName}`;
 });
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  const changes = this.getChanges()["$set"];
+  if (changes.password) {
+    this.password = hashSync(this.password, +process.env.SALT);
+  }
+  if (changes.mobileNumber) {
+    this.mobileNumber = await Encryption({
+      value: this.mobileNumber,
+      key: process.env.ED_SECRET,
+    });
+  }
   next();
 });
-
-userSchema.methods.comparePassword = async function (password) {
-  return bcrypt.compare(password, this.password);
-};
 
 export const User = mongoose.models.User || mongoose.model("User", userSchema);

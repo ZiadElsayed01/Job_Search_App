@@ -4,6 +4,7 @@ import routerHandler from "./utils/routerHandler.js";
 import dataBaseConnection from "./DB/connection.js";
 config();
 import cors from "cors";
+import "./CronJobs/deleteExpiredOTPs.js";
 
 const whitelist = [process.env.CORS_ORIGIN, undefined];
 const corsOptions = {

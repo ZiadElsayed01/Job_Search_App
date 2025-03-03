@@ -1,23 +1,36 @@
 import { Router } from "express";
 import {
-  gmailLoginService,
-  gmailSignUpService,
-  logInService,
-  logOut,
-  refreshToken,
   signUpService,
   verifyEmailService,
+  logInService,
+  gmailSignUpService,
+  gmailLoginService,
+  forgetPassword,
+  resetPassword,
+  refreshToken,
+  logOut,
 } from "./Services/authServices.js";
-import { ifUserExists, ifUserNotExists } from "../../Middlewares/userExistenceMiddleware.js";
 import { errorHandlerMiddleware } from "../../Middlewares/errorHandlerMiddleware.js";
+import { forgetPasswordSchema, gmailLoginSchema, gmailSignUpSchema, loginSchema, refreshTokenSchema, resetPasswordSchema, signUpSchema, verifyEmailSchema } from "../../Validators/authSchema.js";
+import { validationMiddleware } from "../../Middlewares/validationMiddleware.js";
 const authRouter = Router();
 
-authRouter.post("/signup", ifUserExists, errorHandlerMiddleware(signUpService));
-authRouter.post("/gmail-signup", errorHandlerMiddleware(gmailSignUpService));
-authRouter.post("/verify-email", errorHandlerMiddleware(verifyEmailService));
-authRouter.post("/login", ifUserNotExists, errorHandlerMiddleware(logInService));
-authRouter.post("/gmail-login", errorHandlerMiddleware(gmailLoginService));
-authRouter.post("/refresh-token", errorHandlerMiddleware(refreshToken));
-authRouter.post("/logout", errorHandlerMiddleware(logOut));
+authRouter.post("/signup", validationMiddleware(signUpSchema), errorHandlerMiddleware(signUpService));
+authRouter.post("/verify-email",validationMiddleware(verifyEmailSchema), errorHandlerMiddleware(verifyEmailService));
+authRouter.post("/login",validationMiddleware(loginSchema), errorHandlerMiddleware(logInService));
+authRouter.post("/gmail-signup",validationMiddleware(gmailSignUpSchema), errorHandlerMiddleware(gmailSignUpService));
+authRouter.post("/gmail-login",validationMiddleware(gmailLoginSchema), errorHandlerMiddleware(gmailLoginService));
+authRouter.post(
+  "/forget-password",
+  validationMiddleware(forgetPasswordSchema),
+  errorHandlerMiddleware(forgetPassword)
+);
+authRouter.post(
+  "/reset-password",
+  validationMiddleware(resetPasswordSchema),
+  errorHandlerMiddleware(resetPassword)
+);
+authRouter.post("/refresh-token",validationMiddleware(refreshTokenSchema), errorHandlerMiddleware(refreshToken));
+authRouter.post("/logout",validationMiddleware(refreshTokenSchema), errorHandlerMiddleware(logOut));
 
 export default authRouter;

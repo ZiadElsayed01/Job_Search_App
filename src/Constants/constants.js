@@ -7,6 +7,7 @@ export const provider = {
 export const gender = {
   MALE: "male",
   FEMALE: "female",
+  N_A: "N/A",
 };
 // Roles
 export const role = {
@@ -16,7 +17,7 @@ export const role = {
 // OTP
 export const type = {
   CONFIRMEMAIL: "confirmEmail",
-  CONFIRMOTP: "forgetPassword",
+  FORGETPASSWORD: "forgetPassword",
 };
 // Numbers Of Employees
 export const numberOfEmployees = {
