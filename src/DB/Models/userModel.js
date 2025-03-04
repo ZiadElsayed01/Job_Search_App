@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { gender, provider, role, type } from "../../Constants/constants.js";
-import { Encryption } from "../../utils/encryptionAndDecryption.js";
+import { Decryption, Encryption } from "../../utils/encryptionAndDecryption.js";
 import { hash, hashSync } from "bcrypt";
 
 const userSchema = new mongoose.Schema(
@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema(
     mobileNumber: { type: String, required: true },
     role: { type: String, enum: Object.values(role), default: role.USER },
     isConfirmed: { type: Boolean, default: false },
+    deleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
     bannedAt: { type: Date },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -53,16 +54,26 @@ const userSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 // Virtual field for username
 userSchema.virtual("username").get(function () {
-  return `${this.firstName} ${this.lastName}`;
+  const username = `${this.firstName} ${this.lastName}`;
+  return username;
 });
 
-// Hash password before saving
-userSchema.pre("save", async function (next) {
+// Middleware to include firstName and lastName when username is needed
+userSchema.pre(/^find/, function (next) {
+  // Check if the query is selecting the username virtual field
+  if (this._fields && this._fields.username) {
+    // Include firstName and lastName in the query
+    this.select("firstName lastName");
+  }
+  next();
+});
+
+userSchema.pre("save", async function () {
   const changes = this.getChanges()["$set"];
   if (changes.password) {
     this.password = hashSync(this.password, +process.env.SALT);
@@ -73,7 +84,35 @@ userSchema.pre("save", async function (next) {
       key: process.env.ED_SECRET,
     });
   }
-  next();
 });
+
+userSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this._update.mobileNumber;
+  if (update) {
+    this._update.mobileNumber = await Encryption({
+      value: update,
+      key: process.env.ED_SECRET,
+    });
+  }
+});
+
+userSchema.post(
+  ["findOneAndUpdate", "find", "findOne"],
+  async function (doc) {
+    if (this.op === "find") {
+      doc.forEach(async (doc) => {
+        doc.mobileNumber = await Decryption({
+          cipher: doc.mobileNumber,
+          key: process.env.ED_SECRET,
+        });
+      });
+    } else if (doc && doc.mobileNumber) {
+      doc.mobileNumber = await Decryption({
+        cipher: doc.mobileNumber,
+        key: process.env.ED_SECRET,
+      });
+    }
+  }
+);
 
 export const User = mongoose.models.User || mongoose.model("User", userSchema);

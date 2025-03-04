@@ -3,8 +3,6 @@ import userRouter from "../Modules/User/userController.js";
 import authRouter from "../Modules/Auth/authController.js";
 
 export default function routerHandler(app, express) {
-  app.use("/Assets", express.static("Assets"));
-
   app.use("/auth", authRouter);
   app.use("/user", userRouter);
 

@@ -19,7 +19,7 @@ export const authenticationMiddleware = (api) => {
 
     const user = await User.findOne({ _id: data._id });
     if (!user) {
-      return res.status(401).json({ message: "User not found, please signup" });
+      return res.status(401).json({ message: "User not found, please login again" });
     }
 
     req.loggedInUser = user;

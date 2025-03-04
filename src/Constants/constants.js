@@ -58,6 +58,6 @@ export const applicationStatus = {
 };
 // Extentions
 export const extension = {
-  IMAGE: ["jpg", "png"],
+  IMAGE: ["jpg","jpeg", "png","JPG"],
   DOCUMENT: ["pdf"],
 };
