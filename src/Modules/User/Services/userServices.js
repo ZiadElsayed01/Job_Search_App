@@ -1,7 +1,7 @@
 import { compareSync } from "bcrypt";
 import { User } from "../../../DB/Models/userModel.js";
 import { cloudinaryConfig } from "../../../Config/cloudinaryConfig.js";
-import { uploadPicture } from "../../../utils/uploadPicture.js";
+import { upload } from "../../../utils/uploadPicture.js";
 
 // Update User Account
 export const updateUserAccount = async (req, res) => {
@@ -90,7 +90,7 @@ export const uploadProfileImage = async (req, res) => {
     await cloudinaryConfig().uploader.destroy(user.profilePic.public_id);
   }
 
-  const { secure_url, public_id } = await uploadPicture(file, "Users/Profile");
+  const { secure_url, public_id } = await upload(file, "Users/Profile");
 
   await User.findByIdAndUpdate(
     _id,
@@ -114,7 +114,7 @@ export const uploadCoverImage = async (req, res) => {
     await cloudinaryConfig().uploader.destroy(user.coverPic.public_id);
   }
 
-  const { secure_url, public_id } = await uploadPicture(file, "Users/Cover");
+  const { secure_url, public_id } = await upload(file, "Users/Cover");
 
   await User.findByIdAndUpdate(
     _id,

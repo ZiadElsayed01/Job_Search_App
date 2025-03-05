@@ -28,14 +28,22 @@ const companySchema = new mongoose.Schema(
     },
     HRs: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     bannedAt: { type: Date, default: null },
-    deletedAt: { type: Date, default: null },
+    deleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
     legalAttachment: {
       secure_url: { type: String },
       public_id: { type: String },
     },
     approvedByAdmin: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-export const Company = mongoose.models.Company || mongoose.model("Company", companySchema);
+companySchema.virtual("jobs", {
+  ref: "JobOpportunity",
+  localField: "_id",
+  foreignField: "companyId",
+});
+
+export const Company =
+  mongoose.models.Company || mongoose.model("Company", companySchema);

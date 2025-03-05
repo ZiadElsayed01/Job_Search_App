@@ -96,23 +96,20 @@ userSchema.pre("findOneAndUpdate", async function (next) {
   }
 });
 
-userSchema.post(
-  ["findOneAndUpdate", "find", "findOne"],
-  async function (doc) {
-    if (this.op === "find") {
-      doc.forEach(async (doc) => {
-        doc.mobileNumber = await Decryption({
-          cipher: doc.mobileNumber,
-          key: process.env.ED_SECRET,
-        });
-      });
-    } else if (doc && doc.mobileNumber) {
+userSchema.post(["findOneAndUpdate", "find", "findOne"], async function (doc) {
+  if (this.op === "find") {
+    doc.forEach(async (doc) => {
       doc.mobileNumber = await Decryption({
         cipher: doc.mobileNumber,
         key: process.env.ED_SECRET,
       });
-    }
+    });
+  } else if (doc && doc.mobileNumber) {
+    doc.mobileNumber = await Decryption({
+      cipher: doc.mobileNumber,
+      key: process.env.ED_SECRET,
+    });
   }
-);
+});
 
 export const User = mongoose.models.User || mongoose.model("User", userSchema);

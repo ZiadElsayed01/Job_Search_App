@@ -13,7 +13,11 @@ export const gender = {
 export const role = {
   ADMIN: "admin",
   USER: "user",
+  HR: "hr",
+  OWNER: "owner",
+  USER_OWNER: "user-owner",
 };
+
 // OTP
 export const type = {
   CONFIRMEMAIL: "confirmEmail",
@@ -58,6 +62,6 @@ export const applicationStatus = {
 };
 // Extentions
 export const extension = {
-  IMAGE: ["jpg","jpeg", "png","JPG"],
+  IMAGE: ["jpg", "jpeg", "png", "JPG"],
   DOCUMENT: ["pdf"],
 };

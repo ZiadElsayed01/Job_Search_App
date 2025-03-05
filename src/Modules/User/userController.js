@@ -4,6 +4,8 @@ import { multerHost } from "../../Middlewares/multerMiddleware.js";
 import { extension } from "../../Constants/constants.js";
 import { authenticationMiddleware } from "../../Middlewares/authenticationMiddleware.js";
 import { errorHandlerMiddleware } from "../../Middlewares/errorHandlerMiddleware.js";
+import { validationMiddleware } from "../../Middlewares/validationMiddleware.js";
+import { updatePasswordSchema, updateUserAccountSchema, uploadImageSchema } from "../../Validators/userSchema.js";
 const userRouter = Router();
 
 // uth router
@@ -12,6 +14,7 @@ userRouter.use(errorHandlerMiddleware(authenticationMiddleware()));
 // update user account
 userRouter.put(
   "/update-account-info",
+  validationMiddleware(updateUserAccountSchema),
   errorHandlerMiddleware(updateUserAccount)
 );
 
@@ -22,11 +25,12 @@ userRouter.get("/profile-data", errorHandlerMiddleware(getUserData));
 userRouter.get("/another-profile-data/:id", errorHandlerMiddleware(getAnotherUserData));
 
 // update password
-userRouter.patch("/update-password", errorHandlerMiddleware(updatePassword));
+userRouter.patch("/update-password",validationMiddleware(updatePasswordSchema), errorHandlerMiddleware(updatePassword));
 
 // upload profile image
 userRouter.patch(
   "/upload-profile-image",
+  validationMiddleware(uploadImageSchema),
   multerHost(extension.IMAGE).single("profile-image"),
   errorHandlerMiddleware(uploadProfileImage)
 );
@@ -34,6 +38,7 @@ userRouter.patch(
 // upload cover image
 userRouter.patch(
   "/upload-cover-image",
+  validationMiddleware(uploadImageSchema),
   multerHost(extension.IMAGE).single("cover-image"),
   errorHandlerMiddleware(uploadCoverImage)
 );

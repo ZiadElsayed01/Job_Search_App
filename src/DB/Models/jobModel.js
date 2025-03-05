@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
-import { jobLocation, seniorityLevel, workingTime } from "../../Constants/constants.js";
+import {
+  jobLocation,
+  seniorityLevel,
+  workingTime,
+} from "../../Constants/constants.js";
 
 const jobOpportunitySchema = new mongoose.Schema(
   {
@@ -32,10 +36,11 @@ const jobOpportunitySchema = new mongoose.Schema(
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Company",
-      required: true,
     },
   },
   { timestamps: true }
 );
 
-export const JobOpportunity = mongoose.models.JobOpportunity || mongoose.model("JobOpportunity", jobOpportunitySchema);
+export const JobOpportunity =
+  mongoose.models.JobOpportunity ||
+  mongoose.model("JobOpportunity", jobOpportunitySchema);
